@@ -1,0 +1,8 @@
+Flask>=2.3
+requests>=2.30
+httpx>=0.26
+pycryptodome>=3.18
+protobuf>=4.23
+google-api-core>=2.11
+gunicorn>=21.2
+uvicorn>=0.23
