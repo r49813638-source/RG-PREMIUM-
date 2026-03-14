@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RG PREMIUM V2.0 - REHAN 1M!!</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap');
+
+body{
+    background:#000;
+    color:#fff;
+    font-family:'Rajdhani',sans-serif;
+    user-select:none;
+}
+input{user-select:text}
+
+.orbitron{font-family:'Orbitron',sans-serif}
+
+.bg-card{
+    background:#0a0a0a;
+    border:1px solid #1a1a1a;
+    border-radius:20px;
+    box-shadow:0 10px 40px rgba(255,0,0,.15);
+}
+
+.input-box{
+    background:#111;
+    border:1px solid #222;
+    border-radius:12px;
+    transition:.3s;
+}
+.input-box:focus-within{
+    border-color:#ff0000;
+    box-shadow:0 0 10px rgba(255,0,0,.3);
+}
+
+.btn-action{
+    background:linear-gradient(90deg,#ff0000,#8b0000);
+    transition:.2s;
+}
+.btn-action:active{transform:scale(.96)}
+
+.tab-btn{color:#555;border-radius:12px}
+.tab-btn.active{
+    background:#ff0000;
+    color:#fff;
+    box-shadow:0 0 20px rgba(255,0,0,.4);
+}
+
+/* MUSIC BUTTON */
+#musicToggle{
+    position:fixed;
+    top:25px;
+    right:25px;
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    background:linear-gradient(145deg,#1a0000,#4d0000);
+    border:2px solid #ff0000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+}
+.music-pulse{animation:pulse 1.5s infinite}
+@keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(255,0,0,.7)}
+    70%{box-shadow:0 0 0 12px rgba(255,0,0,0)}
+    100%{box-shadow:0 0 0 0 rgba(255,0,0,0)}
+}
+
+/* ADMIN BUTTON */
+.admin-btn{
+    box-shadow:0 0 15px rgba(255,0,0,.6);
+    animation:adminGlow 2s infinite;
+}
+@keyframes adminGlow{
+    0%{box-shadow:0 0 10px rgba(255,0,0,.4)}
+    50%{box-shadow:0 0 30px rgba(255,0,0,1)}
+    100%{box-shadow:0 0 10px rgba(255,0,0,.4)}
+}
+
+/* TOAST */
+#toast{
+    position:fixed;
+    bottom:80px;
+    left:50%;
+    transform:translateX(-50%);
+    padding:14px 35px;
+    border-radius:50px;
+    font-weight:bold;
+    display:none;
+    z-index:2000;
+}
+</style>
+</head>
+
+<body class="flex flex-col items-center p-4">
+
+<!-- MUSIC -->
+<audio id="music1" src="/static/music1.mp3"></audio>
+<audio id="music2" src="/static/music2.mp3"></audio>
+<audio id="music3" src="/static/music3.mp3"></audio>
+
+<button id="musicToggle" onclick="toggleMusic()">
+    <i id="musicIcon" class="fas fa-play text-white text-sm"></i>
+</button>
+
+<div class="w-full max-w-md mt-8 text-center">
+
+<h1 class="text-4xl font-bold orbitron text-red-600">
+RG <span class="text-white">PREMIUM</span>
+</h1>
+<p class="text-[10px] text-gray-500 uppercase mt-1">System Online • WEB BY REHAN</p>
+
+<div class="flex gap-2 mt-10 mb-6 p-1 bg-card">
+    <button id="fTab" onclick="switchTab('friend')" class="tab-btn active w-1/2 py-3 font-bold text-xs">Add Friend</button>
+    <button id="iTab" onclick="switchTab('info')" class="tab-btn w-1/2 py-3 font-bold text-xs">Info</button>
+</div>
+
+<!-- FRIEND -->
+<div id="friendPanel" class="bg-card p-6 text-left space-y-4">
+    <div class="input-box p-3">
+        <input id="f_target" placeholder="Target UID" class="bg-transparent w-full outline-none text-sm">
+    </div>
+    <div class="input-box p-3">
+        <input id="f_limit" type="number" placeholder="How Many Accounts?" class="bg-transparent w-full outline-none text-sm">
+    </div>
+
+    <button onclick="sendFriendRequest()" class="btn-action w-full py-4 rounded-xl font-bold text-xs">
+        SEND SPAM REQUEST
+    </button>
+
+    <div id="f_log" class="mt-3 bg-black border border-gray-700 p-4 rounded-xl text-sm"></div>
+</div>
+
+<!-- INFO -->
+<div id="infoPanel" class="bg-card p-6 hidden">
+    <div class="input-box p-3">
+        <input id="i_uid" placeholder="Target UID" class="bg-transparent w-full outline-none text-sm">
+    </div>
+    <button onclick="getInfo()" class="btn-action w-full py-4 rounded-xl font-bold text-xs mt-4">
+        GET INFO
+    </button>
+    <div id="i_log" class="mt-3 text-sm"></div>
+</div>
+
+<!-- ADMIN -->
+<div class="bg-card p-5 mt-6 text-center">
+    <p class="text-xs text-gray-400 mb-3 uppercase">Contact Admin</p>
+    <a href="https://instagram.com/rehan_gaming_2.0_" target="_blank"
+       onclick="showNotify('Opening Instagram…','success')">
+        <button class="btn-action admin-btn w-full py-4 rounded-xl font-bold text-xs flex justify-center gap-3">
+            <i class="fab fa-instagram text-lg"></i>
+            CLICK TO CONTACT ADMIN
+        </button>
+    </a>
+</div>
+
+<div id="toast"></div>
+</div>
+
+<script>
+function switchTab(t){
+    friendPanel.classList.toggle('hidden',t!=='friend');
+    infoPanel.classList.toggle('hidden',t!=='info');
+    fTab.classList.toggle('active',t==='friend');
+    iTab.classList.toggle('active',t==='info');
+}
+
+// ✅ FIXED MUSIC (AUTO LOOP 3 SONGS)
+
+const m1 = document.getElementById("music1");
+const m2 = document.getElementById("music2");
+const m3 = document.getElementById("music3");
+const icon = document.getElementById("musicIcon");
+const btn  = document.getElementById("musicToggle");
+
+let playing = false;
+let current = 1;
+
+m1.volume = m2.volume = m3.volume = 0.7;
+
+function stopAll(){
+    m1.pause(); m1.currentTime = 0;
+    m2.pause(); m2.currentTime = 0;
+    m3.pause(); m3.currentTime = 0;
+}
+
+function playMusic(){
+    if(!playing) return;
+
+    stopAll();
+
+    if(current === 1){
+        m1.play();
+    }else if(current === 2){
+        m2.play();
+    }else if(current === 3){
+        m3.play();
+    }
+}
+
+m1.onended = function(){
+    current = 2;
+    playMusic();
+};
+
+m2.onended = function(){
+    current = 3;
+    playMusic();
+};
+
+m3.onended = function(){
+    current = 1;
+    playMusic();
+};
+
+function toggleMusic(){
+    if(playing){
+        playing = false;
+        stopAll();
+        icon.className = "fas fa-play text-white";
+        btn.classList.remove("music-pulse");
+    }else{
+        playing = true;
+        playMusic();
+        icon.className = "fas fa-pause text-white";
+        btn.classList.add("music-pulse");
+    }
+}
+
+/* TOAST */
+function showNotify(msg,type){
+    toast.innerText=msg;
+    toast.style.background=type==='success'?'#00c853':'#d50000';
+    toast.style.display='block';
+    setTimeout(()=>toast.style.display='none',3000);
+}
+
+/* PREMIUM SPAM RESPONSE */
+async function sendFriendRequest(){
+    if(!f_target.value||!f_limit.value)
+        return showNotify("Fill all boxes","error");
+
+    f_log.innerHTML =
+        `<div class="text-yellow-400 animate-pulse">🚀 Sending requests...</div>`;
+
+    try{
+        const r=await fetch("/api/spam_add",{
+            method:"POST",
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({target:f_target.value,limit:f_limit.value})
+        });
+        const d=await r.json();
+
+        f_log.innerHTML=`
+            <div class="space-y-1">
+                <div class="text-green-400">✅ Success : ${d.success}</div>
+                <div class="text-red-400">❌ Failed : ${d.failed}</div>
+                <div class="text-yellow-400">⚠️ Duplicate : ${d.duplicate}</div>
+                <div class="text-blue-400">📦 Total Used : ${d.total}</div>
+                <div class="text-gray-400 text-xs mt-2">Completed Successfully</div>
+            </div>
+        `;
+        showNotify("Spam Completed","success");
+    }catch{
+        f_log.innerHTML=`<div class="text-red-500">❌ Request Failed</div>`;
+        showNotify("Failed","error");
+    }
+}
+
+/* ------------------- PLAYER INFO ------------------- */
+async function getInfo(){
+    const uid = document.getElementById('i_uid').value;
+    const i_log = document.getElementById('i_log');
+    if(!uid){ return showNotify("Enter UID!","error"); }
+
+    i_log.innerHTML = `<div class="text-yellow-400 animate-pulse">🚀 Loading info...</div>`;
+
+    try {
+        const res = await fetch("/api/info", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ uid, region:"IND" })
+        });
+        const data = await res.json();
+
+        const acc = data.AccountInfo || {};
+        const pi = data.AccountProfileInfo || {};
+        const guild = data.GuildInfo || {};
+        const social = data.socialinfo || {};
+
+        const createDate = acc.AccountCreateTime ? new Date(Number(acc.AccountCreateTime)*1000).toLocaleString() : "-";
+        const lastLogin = acc.AccountLastLogin ? new Date(Number(acc.AccountLastLogin)*1000).toLocaleString() : "-";
+
+        i_log.innerHTML = `
+            <div class="space-y-1 text-xs">
+                <p><span class="text-red-400 font-bold">NAME:</span> ${acc.AccountName || "-"}</p>
+                <p><span class="text-yellow-400 font-bold">UID:</span> ${uid}</p>
+                <p><span class="text-lime-400 font-bold">LEVEL:</span> ${acc.AccountLevel || "-"}</p>
+                <p><span class="text-cyan-400 font-bold">LIKES:</span> ${acc.AccountLikes || "-"}</p>
+                <p><span class="text-magenta-400 font-bold">REGION:</span> ${acc.AccountRegion || "-"}</p>
+                <p><span class="text-orange-400 font-bold">TITLE:</span> ${acc.Title || "-"}</p>
+                <p><span class="text-purple-400 font-bold">TYPE:</span> ${acc.AccountType || "-"}</p>
+                <p><span class="text-gray-400 font-bold">CREATED:</span> ${createDate}</p>
+                <p><span class="text-gray-300 font-bold">LAST LOGIN:</span> ${lastLogin}</p>
+                <hr class="border-gray-600 my-1">
+                <p><span class="text-orange-400 font-bold">BR RANK:</span> ${acc.BrMaxRank || "-"} | ${acc.BrRankPoint || "-"}</p>
+                <p><span class="text-orange-400 font-bold">CS RANK:</span> ${acc.CsMaxRank || "-"} | ${acc.CsRankPoint || "-"}</p>
+                <hr class="border-gray-600 my-1">
+                <p><span class="text-blue-400 font-bold">GUILD NAME:</span> ${guild.GuildName || "-"}</p>
+                <p><span class="text-blue-300 font-bold">MEMBERS:</span> ${guild.GuildMember || "-"} / ${guild.GuildCapacity || "-"}</p>
+                <p><span class="text-blue-500 font-bold">GUILD LEVEL:</span> ${guild.GuildLevel || "-"}</p>
+                <p><span class="text-blue-200 font-bold">GUILD ID:</span> ${guild.GuildID || "-"}</p>
+                <p><span class="text-blue-100 font-bold">GUILD OWNER:</span> ${guild.GuildOwner || "-"}</p>
+                <hr class="border-gray-600 my-1">
+                <p><span class="text-teal-400 font-bold">Equipped Outfit:</span> ${pi.EquippedOutfit?.join(", ") || "-"}</p>
+                <p><span class="text-teal-300 font-bold">Equipped Skills:</span> ${pi.EquippedSkills?.join(", ") || "-"}</p>
+                <hr class="border-gray-600 my-1">
+                <p><span class="text-pink-400 font-bold">BIO:</span> ${social.signature || "-"}</p>
+            </div>
+        `;
+        showNotify("Info Loaded","success");
+
+    } catch(e) {
+        i_log.innerHTML = `<div class="text-red-500">❌ Failed to load info</div>`;
+        console.log(e);
+        showNotify("Request Failed","error");
+    }
+}
+</script>
+
+</body>
+  </html>
