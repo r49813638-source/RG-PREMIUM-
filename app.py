@@ -6,7 +6,7 @@ from urllib3.util.retry import Retry
 
 app = Flask(__name__)
 
-BASE_URL = "https://all-aapi-production.up.railway.app"
+BASE_URL = "https://all-apii.onrender.com"
 INFO_URL = "https://info-api-vyre.onrender.com"
 
 ACCOUNTS_FILE = "accounts.json"
