@@ -18,10 +18,10 @@ def create_session():
     s = requests.Session()
 
     retries = Retry(
-        total=4,  # increased retry
-        backoff_factor=1,  # better delay
+        total=4,
+        backoff_factor=1,
         status_forcelist=[500, 502, 503, 504],
-        allowed_methods=["GET", "POST"]  # FIX
+        allowed_methods=["GET", "POST"]
     )
 
     adapter = HTTPAdapter(
@@ -63,7 +63,7 @@ def request_token(uid, password):
         r = session.get(
             BASE_URL + "/token",
             params={"uid": uid, "password": password},
-            timeout=80   # increased timeout
+            timeout=80
         )
         j = r.json()
         if j.get("status") == "success":
@@ -136,7 +136,6 @@ def spam_add():
 
         res = None
 
-        # 🔥 manual retry added
         for attempt in range(3):
             try:
                 response = session.get(
@@ -171,7 +170,7 @@ def spam_add():
         logs.append({"uid": uid, "status": status})
         used += 1
 
-        time.sleep(0.5)  # slightly safer delay
+        time.sleep(0.5)
 
     return jsonify({
         "success": success,
@@ -185,19 +184,28 @@ def spam_add():
 
 @app.route("/api/info", methods=["POST"])
 def info():
-    uid = request.json.get("uid")
+    data = request.json or {}
+    uid = data.get("uid")
     if not uid:
         return jsonify({"status": "failed", "error": "UID missing"})
 
     try:
+        headers = {"User-Agent": "Mozilla/5.0"}
         r = session.get(
             INFO_URL + "/get",
             params={"uid": uid, "region": "IND"},
+            headers=headers,
             timeout=80
         )
-        return jsonify(r.json())
+        j = r.json()
+        print("DEBUG INFO RESPONSE:", j)
+        return jsonify(j)
+    except requests.exceptions.Timeout:
+        return jsonify({"status": "failed", "error": "Request timed out"})
     except requests.exceptions.RequestException as e:
         return jsonify({"status": "failed", "error": str(e)})
+    except Exception as e:
+        return jsonify({"status": "failed", "error": f"Unknown error: {e}"})
 
 # === Startup ===
 import sys
