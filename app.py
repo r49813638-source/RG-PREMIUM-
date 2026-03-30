@@ -18,16 +18,16 @@ def create_session():
     s = requests.Session()
 
     retries = Retry(
-        total=2,                 # fast retry
-        backoff_factor=0.5,
+        total=4,  # increased retry
+        backoff_factor=1,  # better delay
         status_forcelist=[500, 502, 503, 504],
-        allowed_methods=["GET"]
+        allowed_methods=["GET", "POST"]  # FIX
     )
 
     adapter = HTTPAdapter(
         max_retries=retries,
-        pool_connections=50,
-        pool_maxsize=50
+        pool_connections=100,
+        pool_maxsize=100
     )
 
     s.mount("http://", adapter)
@@ -63,7 +63,7 @@ def request_token(uid, password):
         r = session.get(
             BASE_URL + "/token",
             params={"uid": uid, "password": password},
-            timeout=50
+            timeout=80   # increased timeout
         )
         j = r.json()
         if j.get("status") == "success":
@@ -71,7 +71,11 @@ def request_token(uid, password):
             tokens[str(uid)] = j["token"]
             save_tokens(tokens)
             return j["token"]
-    except requests.exceptions.RequestException:
+    except requests.exceptions.Timeout:
+        print(f"[TIMEOUT] Token for {uid}")
+        return None
+    except Exception as e:
+        print(f"[ERROR] {e}")
         return None
     return None
 
@@ -130,15 +134,28 @@ def spam_add():
             used += 1
             continue
 
-        try:
-            res = session.get(
-                BASE_URL + "/add_friend",
-                params={"token": token, "player_id": target},
-                timeout=50
-            ).json()
-        except requests.exceptions.RequestException:
+        res = None
+
+        # 🔥 manual retry added
+        for attempt in range(3):
+            try:
+                response = session.get(
+                    BASE_URL + "/add_friend",
+                    params={"token": token, "player_id": target},
+                    timeout=80
+                )
+                res = response.json()
+                break
+            except requests.exceptions.Timeout:
+                print(f"[RETRY] Timeout retry {attempt+1}")
+                time.sleep(2)
+            except Exception as e:
+                print(f"[ERROR] {e}")
+                break
+
+        if not res:
             failed += 1
-            logs.append({"uid": uid, "status": "timeout"})
+            logs.append({"uid": uid, "status": "timeout_fail"})
             used += 1
             continue
 
@@ -154,7 +171,7 @@ def spam_add():
         logs.append({"uid": uid, "status": status})
         used += 1
 
-        time.sleep(0.2)  # fast but safe
+        time.sleep(0.5)  # slightly safer delay
 
     return jsonify({
         "success": success,
@@ -176,7 +193,7 @@ def info():
         r = session.get(
             INFO_URL + "/get",
             params={"uid": uid, "region": "IND"},
-            timeout=50
+            timeout=80
         )
         return jsonify(r.json())
     except requests.exceptions.RequestException as e:
