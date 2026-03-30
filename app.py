@@ -63,7 +63,7 @@ def request_token(uid, password):
         r = session.get(
             BASE_URL + "/token",
             params={"uid": uid, "password": password},
-            timeout=6
+            timeout=50
         )
         j = r.json()
         if j.get("status") == "success":
@@ -134,7 +134,7 @@ def spam_add():
             res = session.get(
                 BASE_URL + "/add_friend",
                 params={"token": token, "player_id": target},
-                timeout=8
+                timeout=50
             ).json()
         except requests.exceptions.RequestException:
             failed += 1
@@ -176,7 +176,7 @@ def info():
         r = session.get(
             INFO_URL + "/get",
             params={"uid": uid, "region": "IND"},
-            timeout=6
+            timeout=50
         )
         return jsonify(r.json())
     except requests.exceptions.RequestException as e:
