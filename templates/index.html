@@ -165,22 +165,7 @@ RG <span class="text-white">PREMIUM</span>
 <div id="toast"></div>
 </div>
 
-<!-- ------------------- FIXED SCRIPT ------------------- -->
 <script>
-// ✅ DOM ELEMENTS
-const friendPanel = document.getElementById('friendPanel');
-const infoPanel   = document.getElementById('infoPanel');
-const fTab        = document.getElementById('fTab');
-const iTab        = document.getElementById('iTab');
-
-const f_target    = document.getElementById('f_target');
-const f_limit     = document.getElementById('f_limit');
-const f_log       = document.getElementById('f_log');
-
-const i_log       = document.getElementById('i_log');
-const toast       = document.getElementById('toast');
-
-// ✅ TAB SWITCH
 function switchTab(t){
     friendPanel.classList.toggle('hidden',t!=='friend');
     infoPanel.classList.toggle('hidden',t!=='info');
@@ -188,7 +173,8 @@ function switchTab(t){
     iTab.classList.toggle('active',t==='info');
 }
 
-// ✅ MUSIC
+// ✅ FIXED MUSIC (AUTO LOOP 3 SONGS)
+
 const m1 = document.getElementById("music1");
 const m2 = document.getElementById("music2");
 const m3 = document.getElementById("music3");
@@ -200,14 +186,56 @@ let current = 1;
 
 m1.volume = m2.volume = m3.volume = 0.7;
 
-function stopAll(){ m1.pause(); m1.currentTime=0; m2.pause(); m2.currentTime=0; m3.pause(); m3.currentTime=0; }
-function playMusic(){ if(!playing) return; stopAll(); current===1?m1.play():current===2?m2.play():m3.play(); }
-m1.onended=()=>{current=2;playMusic();};
-m2.onended=()=>{current=3;playMusic();};
-m3.onended=()=>{current=1;playMusic();};
-function toggleMusic(){ playing? (playing=false,stopAll(),icon.className="fas fa-play text-white",btn.classList.remove("music-pulse")) : (playing=true,playMusic(),icon.className="fas fa-pause text-white",btn.classList.add("music-pulse")); }
+function stopAll(){
+    m1.pause(); m1.currentTime = 0;
+    m2.pause(); m2.currentTime = 0;
+    m3.pause(); m3.currentTime = 0;
+}
 
-// ✅ TOAST
+function playMusic(){
+    if(!playing) return;
+
+    stopAll();
+
+    if(current === 1){
+        m1.play();
+    }else if(current === 2){
+        m2.play();
+    }else if(current === 3){
+        m3.play();
+    }
+}
+
+m1.onended = function(){
+    current = 2;
+    playMusic();
+};
+
+m2.onended = function(){
+    current = 3;
+    playMusic();
+};
+
+m3.onended = function(){
+    current = 1;
+    playMusic();
+};
+
+function toggleMusic(){
+    if(playing){
+        playing = false;
+        stopAll();
+        icon.className = "fas fa-play text-white";
+        btn.classList.remove("music-pulse");
+    }else{
+        playing = true;
+        playMusic();
+        icon.className = "fas fa-pause text-white";
+        btn.classList.add("music-pulse");
+    }
+}
+
+/* TOAST */
 function showNotify(msg,type){
     toast.innerText=msg;
     toast.style.background=type==='success'?'#00c853':'#d50000';
@@ -215,11 +243,13 @@ function showNotify(msg,type){
     setTimeout(()=>toast.style.display='none',3000);
 }
 
-// ✅ SPAM FUNCTION
+/* PREMIUM SPAM RESPONSE */
 async function sendFriendRequest(){
-    if(!f_target.value||!f_limit.value) return showNotify("Fill all boxes","error");
+    if(!f_target.value||!f_limit.value)
+        return showNotify("Fill all boxes","error");
 
-    f_log.innerHTML = `<div class="text-yellow-400 animate-pulse">🚀 Sending requests...</div>`;
+    f_log.innerHTML =
+        `<div class="text-yellow-400 animate-pulse">🚀 Sending requests...</div>`;
 
     try{
         const r=await fetch("/api/spam_add",{
@@ -245,57 +275,66 @@ async function sendFriendRequest(){
     }
 }
 
-// ✅ PLAYER INFO
+/* ------------------- PLAYER INFO ------------------- */
 async function getInfo(){
     const uid = document.getElementById('i_uid').value;
+    const i_log = document.getElementById('i_log');
     if(!uid){ return showNotify("Enter UID!","error"); }
 
     i_log.innerHTML = `<div class="text-yellow-400 animate-pulse">🚀 Loading info...</div>`;
 
-    try{
-        const res=await fetch("/api/info",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({uid,region:"IND"})});
-        let data;
-        try{ data = await res.json(); } catch { const text=await res.text(); console.log("RAW RESPONSE:",text); i_log.innerHTML=`<div class="text-red-500">❌ Invalid API response</div>`; return; }
-        if(data.status==="failed"){ i_log.innerHTML=`<div class="text-red-500">❌ ${data.error}</div>`; return; }
+    try {
+        const res = await fetch("/api/info", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ uid, region:"IND" })
+        });
+        const data = await res.json();
 
-        const acc=data.AccountInfo||{};
-        const pi=data.AccountProfileInfo||{};
-        const guild=data.GuildInfo||{};
-        const social=data.socialinfo||{};
+        const acc = data.AccountInfo || {};
+        const pi = data.AccountProfileInfo || {};
+        const guild = data.GuildInfo || {};
+        const social = data.socialinfo || {};
 
-        const createDate=acc.AccountCreateTime?new Date(Number(acc.AccountCreateTime)*1000).toLocaleString():"-";
-        const lastLogin=acc.AccountLastLogin?new Date(Number(acc.AccountLastLogin)*1000).toLocaleString():"-";
+        const createDate = acc.AccountCreateTime ? new Date(Number(acc.AccountCreateTime)*1000).toLocaleString() : "-";
+        const lastLogin = acc.AccountLastLogin ? new Date(Number(acc.AccountLastLogin)*1000).toLocaleString() : "-";
 
-        i_log.innerHTML=`
+        i_log.innerHTML = `
             <div class="space-y-1 text-xs">
-                <p><span class="text-red-400 font-bold">NAME:</span> ${acc.AccountName||"-"}</p>
+                <p><span class="text-red-400 font-bold">NAME:</span> ${acc.AccountName || "-"}</p>
                 <p><span class="text-yellow-400 font-bold">UID:</span> ${uid}</p>
-                <p><span class="text-lime-400 font-bold">LEVEL:</span> ${acc.AccountLevel||"-"}</p>
-                <p><span class="text-cyan-400 font-bold">LIKES:</span> ${acc.AccountLikes||"-"}</p>
-                <p><span class="text-magenta-400 font-bold">REGION:</span> ${acc.AccountRegion||"-"}</p>
-                <p><span class="text-orange-400 font-bold">TITLE:</span> ${acc.Title||"-"}</p>
-                <p><span class="text-purple-400 font-bold">TYPE:</span> ${acc.AccountType||"-"}</p>
+                <p><span class="text-lime-400 font-bold">LEVEL:</span> ${acc.AccountLevel || "-"}</p>
+                <p><span class="text-cyan-400 font-bold">LIKES:</span> ${acc.AccountLikes || "-"}</p>
+                <p><span class="text-magenta-400 font-bold">REGION:</span> ${acc.AccountRegion || "-"}</p>
+                <p><span class="text-orange-400 font-bold">TITLE:</span> ${acc.Title || "-"}</p>
+                <p><span class="text-purple-400 font-bold">TYPE:</span> ${acc.AccountType || "-"}</p>
                 <p><span class="text-gray-400 font-bold">CREATED:</span> ${createDate}</p>
                 <p><span class="text-gray-300 font-bold">LAST LOGIN:</span> ${lastLogin}</p>
                 <hr class="border-gray-600 my-1">
-                <p><span class="text-orange-400 font-bold">BR RANK:</span> ${acc.BrMaxRank||"-"} | ${acc.BrRankPoint||"-"}</p>
-                <p><span class="text-orange-400 font-bold">CS RANK:</span> ${acc.CsMaxRank||"-"} | ${acc.CsRankPoint||"-"}</p>
+                <p><span class="text-orange-400 font-bold">BR RANK:</span> ${acc.BrMaxRank || "-"} | ${acc.BrRankPoint || "-"}</p>
+                <p><span class="text-orange-400 font-bold">CS RANK:</span> ${acc.CsMaxRank || "-"} | ${acc.CsRankPoint || "-"}</p>
                 <hr class="border-gray-600 my-1">
-                <p><span class="text-blue-400 font-bold">GUILD NAME:</span> ${guild.GuildName||"-"}</p>
-                <p><span class="text-blue-300 font-bold">MEMBERS:</span> ${guild.GuildMember||"-"} / ${guild.GuildCapacity||"-"}</p>
-                <p><span class="text-blue-500 font-bold">GUILD LEVEL:</span> ${guild.GuildLevel||"-"}</p>
-                <p><span class="text-blue-200 font-bold">GUILD ID:</span> ${guild.GuildID||"-"}</p>
-                <p><span class="text-blue-100 font-bold">GUILD OWNER:</span> ${guild.GuildOwner||"-"}</p>
+                <p><span class="text-blue-400 font-bold">GUILD NAME:</span> ${guild.GuildName || "-"}</p>
+                <p><span class="text-blue-300 font-bold">MEMBERS:</span> ${guild.GuildMember || "-"} / ${guild.GuildCapacity || "-"}</p>
+                <p><span class="text-blue-500 font-bold">GUILD LEVEL:</span> ${guild.GuildLevel || "-"}</p>
+                <p><span class="text-blue-200 font-bold">GUILD ID:</span> ${guild.GuildID || "-"}</p>
+                <p><span class="text-blue-100 font-bold">GUILD OWNER:</span> ${guild.GuildOwner || "-"}</p>
                 <hr class="border-gray-600 my-1">
-                <p><span class="text-teal-400 font-bold">Equipped Outfit:</span> ${pi.EquippedOutfit?.join(", ")||"-"}</p>
-                <p><span class="text-teal-300 font-bold">Equipped Skills:</span> ${pi.EquippedSkills?.join(", ")||"-"}</p>
+                <p><span class="text-teal-400 font-bold">Equipped Outfit:</span> ${pi.EquippedOutfit?.join(", ") || "-"}</p>
+                <p><span class="text-teal-300 font-bold">Equipped Skills:</span> ${pi.EquippedSkills?.join(", ") || "-"}</p>
                 <hr class="border-gray-600 my-1">
-                <p><span class="text-pink-400 font-bold">BIO:</span> ${social.signature||"-"}</p>
+                <p><span class="text-pink-400 font-bold">BIO:</span> ${social.signature || "-"}</p>
             </div>
         `;
         showNotify("Info Loaded","success");
-    }catch(e){ console.log(e); i_log.innerHTML=`<div class="text-red-500">❌ Failed to load info</div>`; showNotify("Request Failed","error"); }
+
+    } catch(e) {
+        i_log.innerHTML = `<div class="text-red-500">❌ Failed to load info</div>`;
+        console.log(e);
+        showNotify("Request Failed","error");
+    }
 }
 </script>
+
 </body>
 </html>
