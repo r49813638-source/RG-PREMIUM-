@@ -227,6 +227,50 @@ function toggleMusic(){
         stopAll();
         icon.className = "fas fa-play text-white";
         btn.classList.remove("music-pulse");
+<script>
+function switchTab(t){
+    friendPanel.classList.toggle('hidden',t!=='friend');
+    infoPanel.classList.toggle('hidden',t!=='info');
+    fTab.classList.toggle('active',t==='friend');
+    iTab.classList.toggle('active',t==='info');
+}
+
+// MUSIC (same)
+const m1 = document.getElementById("music1");
+const m2 = document.getElementById("music2");
+const m3 = document.getElementById("music3");
+const icon = document.getElementById("musicIcon");
+const btn  = document.getElementById("musicToggle");
+
+let playing = false;
+let current = 1;
+
+m1.volume = m2.volume = m3.volume = 0.7;
+
+function stopAll(){
+    m1.pause(); m1.currentTime = 0;
+    m2.pause(); m2.currentTime = 0;
+    m3.pause(); m3.currentTime = 0;
+}
+
+function playMusic(){
+    if(!playing) return;
+    stopAll();
+    if(current === 1){ m1.play(); }
+    else if(current === 2){ m2.play(); }
+    else{ m3.play(); }
+}
+
+m1.onended = ()=>{current=2;playMusic();}
+m2.onended = ()=>{current=3;playMusic();}
+m3.onended = ()=>{current=1;playMusic();}
+
+function toggleMusic(){
+    if(playing){
+        playing = false;
+        stopAll();
+        icon.className = "fas fa-play text-white";
+        btn.classList.remove("music-pulse");
     }else{
         playing = true;
         playMusic();
@@ -235,7 +279,7 @@ function toggleMusic(){
     }
 }
 
-/* TOAST */
+// TOAST
 function showNotify(msg,type){
     toast.innerText=msg;
     toast.style.background=type==='success'?'#00c853':'#d50000';
@@ -243,7 +287,7 @@ function showNotify(msg,type){
     setTimeout(()=>toast.style.display='none',3000);
 }
 
-/* PREMIUM SPAM RESPONSE */
+// SPAM (same)
 async function sendFriendRequest(){
     if(!f_target.value||!f_limit.value)
         return showNotify("Fill all boxes","error");
@@ -275,11 +319,14 @@ async function sendFriendRequest(){
     }
 }
 
-/* ------------------- PLAYER INFO ------------------- */
+/* ------------------- FIXED PLAYER INFO ------------------- */
 async function getInfo(){
     const uid = document.getElementById('i_uid').value;
     const i_log = document.getElementById('i_log');
-    if(!uid){ return showNotify("Enter UID!","error"); }
+
+    if(!uid){
+        return showNotify("Enter UID!","error");
+    }
 
     i_log.innerHTML = `<div class="text-yellow-400 animate-pulse">🚀 Loading info...</div>`;
 
@@ -289,7 +336,24 @@ async function getInfo(){
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ uid, region:"IND" })
         });
-        const data = await res.json();
+
+        let data;
+
+        // ✅ SAFE JSON HANDLE
+        try {
+            data = await res.json();
+        } catch {
+            const text = await res.text();
+            console.log("RAW RESPONSE:", text);
+            i_log.innerHTML = `<div class="text-red-500">❌ Invalid API response</div>`;
+            return;
+        }
+
+        // ✅ FAIL RESPONSE HANDLE
+        if (data.status === "failed") {
+            i_log.innerHTML = `<div class="text-red-500">❌ ${data.error}</div>`;
+            return;
+        }
 
         const acc = data.AccountInfo || {};
         const pi = data.AccountProfileInfo || {};
@@ -299,6 +363,7 @@ async function getInfo(){
         const createDate = acc.AccountCreateTime ? new Date(Number(acc.AccountCreateTime)*1000).toLocaleString() : "-";
         const lastLogin = acc.AccountLastLogin ? new Date(Number(acc.AccountLastLogin)*1000).toLocaleString() : "-";
 
+        // ✅ SAME HTML OUTPUT (NO CHANGE)
         i_log.innerHTML = `
             <div class="space-y-1 text-xs">
                 <p><span class="text-red-400 font-bold">NAME:</span> ${acc.AccountName || "-"}</p>
@@ -326,15 +391,13 @@ async function getInfo(){
                 <p><span class="text-pink-400 font-bold">BIO:</span> ${social.signature || "-"}</p>
             </div>
         `;
+
         showNotify("Info Loaded","success");
 
     } catch(e) {
-        i_log.innerHTML = `<div class="text-red-500">❌ Failed to load info</div>`;
         console.log(e);
+        i_log.innerHTML = `<div class="text-red-500">❌ Failed to load info</div>`;
         showNotify("Request Failed","error");
     }
 }
 </script>
-
-</body>
-  </html>
