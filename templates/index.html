@@ -343,22 +343,22 @@ async function getInfo(){
 }
 </script>
 
-<!-- ✅ FIXED MANUAL STYLE -->
+<!-- ✅ COUNTDOWN VERSION -->
 <script>
 async function startAPI() {
     let status = document.getElementById("status");
 
     status.innerText = "Hitting API... 🚀";
 
-    // ✅ Step 1: ek baar API hit (manual jaisa)
+    // ✅ Step 1: ek baar API hit
     try {
         await fetch("/ping");
     } catch (e) {}
 
-    // ✅ Step 2: wait 60 sec
-    for (let i = 1; i <= 12; i++) {
-        status.innerText = "Waiting... " + (i * 5) + " sec";
-        await new Promise(r => setTimeout(r, 5000));
+    // ✅ Step 2: countdown 60 → 0
+    for (let i = 60; i >= 1; i--) {
+        status.innerText = "Server starting in " + i + " sec ⏳";
+        await new Promise(r => setTimeout(r, 1000));
     }
 
     // ✅ Step 3: enable buttons
