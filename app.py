@@ -104,8 +104,8 @@ def info_page():
 @app.route('/ping')
 def ping():
     try:
-        requests.get(BASE_URL, timeout=10)
-        requests.get(INFO_URL, timeout=10)
+        requests.get(BASE_URL, timeout=80)
+        requests.get(INFO_URL, timeout=80)
     except:
         pass
 
