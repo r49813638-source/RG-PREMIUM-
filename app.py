@@ -100,6 +100,17 @@ def spam_page():
 def info_page():
     return render_template("info.html")
 
+# ✅ NEW ROUTE (ADD THIS)
+@app.route('/ping')
+def ping():
+    try:
+        requests.get(BASE_URL, timeout=10)
+        requests.get(INFO_URL, timeout=10)
+    except:
+        pass
+
+    return jsonify({"status": "running"})
+
 # ---------------- SPAM API ----------------
 
 @app.route("/api/spam_add", methods=["POST"])
