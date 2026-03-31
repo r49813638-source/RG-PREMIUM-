@@ -343,35 +343,29 @@ async function getInfo(){
 }
 </script>
 
-<!-- ✅ YAHI ADD KIYA (NEW SCRIPT) -->
+<!-- ✅ FIXED MANUAL STYLE -->
 <script>
 async function startAPI() {
     let status = document.getElementById("status");
-    if (status) status.innerText = "Starting Server... ⏳";
 
-    for (let i = 0; i < 6; i++) {
-        try {
-            let res = await fetch("/ping");
-            let data = await res.json();
+    status.innerText = "Hitting API... 🚀";
 
-            if (data.status === "running") {
-                if (status) status.innerText = "Server Started ✅";
+    // ✅ Step 1: ek baar API hit (manual jaisa)
+    try {
+        await fetch("/ping");
+    } catch (e) {}
 
-                let spamBtn = document.getElementById("spamBtn");
-                let infoBtn = document.getElementById("infoBtn");
-
-                if (spamBtn) spamBtn.disabled = false;
-                if (infoBtn) infoBtn.disabled = false;
-
-                return;
-            }
-        } catch (e) {}
-
-        if (status) status.innerText = "Retrying... " + (i + 1);
+    // ✅ Step 2: wait 60 sec
+    for (let i = 1; i <= 12; i++) {
+        status.innerText = "Waiting... " + (i * 5) + " sec";
         await new Promise(r => setTimeout(r, 5000));
     }
 
-    if (status) status.innerText = "Server Failed ❌";
+    // ✅ Step 3: enable buttons
+    document.getElementById("spamBtn").disabled = false;
+    document.getElementById("infoBtn").disabled = false;
+
+    status.innerText = "Server Ready ✅";
 }
 </script>
 
