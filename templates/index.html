@@ -343,5 +343,37 @@ async function getInfo(){
 }
 </script>
 
+<!-- ✅ YAHI ADD KIYA (NEW SCRIPT) -->
+<script>
+async function startAPI() {
+    let status = document.getElementById("status");
+    if (status) status.innerText = "Starting Server... ⏳";
+
+    for (let i = 0; i < 6; i++) {
+        try {
+            let res = await fetch("/ping");
+            let data = await res.json();
+
+            if (data.status === "running") {
+                if (status) status.innerText = "Server Started ✅";
+
+                let spamBtn = document.getElementById("spamBtn");
+                let infoBtn = document.getElementById("infoBtn");
+
+                if (spamBtn) spamBtn.disabled = false;
+                if (infoBtn) infoBtn.disabled = false;
+
+                return;
+            }
+        } catch (e) {}
+
+        if (status) status.innerText = "Retrying... " + (i + 1);
+        await new Promise(r => setTimeout(r, 5000));
+    }
+
+    if (status) status.innerText = "Server Failed ❌";
+}
+</script>
+
 </body>
 </html>
