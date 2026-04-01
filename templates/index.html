@@ -123,9 +123,9 @@ RG <span class="text-white">PREMIUM</span>
     <button id="iTab" onclick="switchTab('info')" class="tab-btn w-1/2 py-3 font-bold text-xs">Info</button>
 </div>
 
-<!-- CHECK FOLLOW -->
-<button id="checkFollow" onclick="checkFollow()" class="btn-action w-full py-3 rounded-xl font-bold text-xs mt-4">
-  CHECK FOLLOW
+<!-- FOLLOW FIRST -->
+<button onclick="forceFollow()" class="btn-action w-full py-3 rounded-xl font-bold text-xs mt-4">
+  FOLLOW FIRST
 </button>
 
 <!-- FRIEND -->
@@ -178,7 +178,7 @@ function switchTab(t){
     iTab.classList.toggle('active',t==='info');
 }
 
-// ✅ FIXED MUSIC (AUTO LOOP 3 SONGS)
+// MUSIC
 const m1 = document.getElementById("music1");
 const m2 = document.getElementById("music2");
 const m3 = document.getElementById("music3");
@@ -222,7 +222,7 @@ function toggleMusic(){
     }
 }
 
-/* TOAST */
+// TOAST
 function showNotify(msg,type){
     toast.innerText=msg;
     toast.style.background=type==='success'?'#00c853':'#d50000';
@@ -230,35 +230,46 @@ function showNotify(msg,type){
     setTimeout(()=>toast.style.display='none',3000);
 }
 
-/* ------------------- FOLLOW CHECK ------------------- */
-let hasFollowed = false; // default false
+/* 🔥 FORCE FOLLOW SYSTEM */
+let hasFollowed = false;
+
 const spamBtn = document.getElementById("spamBtn");
 const infoBtn = document.getElementById("infoBtn");
 
-// Agar user pehle se follow kar chuka hai (yahan aap apna logic laga sakte ho)
-if(localStorage.getItem("hasFollowed") === "true"){
-    hasFollowed = true;
-    spamBtn.disabled = false;
-    infoBtn.disabled = false;
-}
+spamBtn.disabled = true;
+infoBtn.disabled = true;
 
-function checkFollow() {
-    const isFollowing = confirm("Have you followed our Instagram?");
-    if(isFollowing){
+window.onload = function(){
+    if(localStorage.getItem("hasFollowed") === "true"){
         hasFollowed = true;
         spamBtn.disabled = false;
         infoBtn.disabled = false;
-        localStorage.setItem("hasFollowed","true");
-        alert("Thanks for following! Buttons enabled.");
-    } else {
-        alert("FOLLOW FIRST!");
     }
+};
+
+function forceFollow(){
+    window.open("https://instagram.com/rehan_gaming_2.0_", "_blank");
+
+    setTimeout(() => {
+        const done = confirm("Follow kiya kya?");
+        if(done){
+            hasFollowed = true;
+            spamBtn.disabled = false;
+            infoBtn.disabled = false;
+            localStorage.setItem("hasFollowed","true");
+            alert("✅ Access Granted");
+        } else {
+            alert("❌ FOLLOW FIRST!");
+        }
+    }, 3000);
 }
 
-/* ------------------- PREMIUM SPAM ------------------- */
+// SPAM
 async function sendFriendRequest(){
-    if(!hasFollowed){ alert("FOLLOW FIRST!"); return; }
-    if(!f_target.value||!f_limit.value) return showNotify("Fill all boxes","error");
+    if(!hasFollowed){ forceFollow(); return; }
+
+    if(!f_target.value||!f_limit.value)
+        return showNotify("Fill all boxes","error");
 
     f_log.innerHTML = `<div class="text-yellow-400 animate-pulse">🚀 Sending requests...</div>`;
 
@@ -286,9 +297,10 @@ async function sendFriendRequest(){
     }
 }
 
-/* ------------------- PLAYER INFO ------------------- */
+// INFO
 async function getInfo(){
-    if(!hasFollowed){ alert("FOLLOW FIRST!"); return; }
+    if(!hasFollowed){ forceFollow(); return; }
+
     const uid = document.getElementById('i_uid').value;
     const i_log = document.getElementById('i_log');
     if(!uid){ return showNotify("Enter UID!","error"); }
@@ -342,11 +354,10 @@ async function getInfo(){
 
     } catch(e) {
         i_log.innerHTML = `<div class="text-red-500">❌ Failed to load info</div>`;
-        console.log(e);
         showNotify("Request Failed","error");
     }
 }
 </script>
 
 </body>
-    </html>
+</html>
