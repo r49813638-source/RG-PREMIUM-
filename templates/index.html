@@ -123,6 +123,11 @@ RG <span class="text-white">PREMIUM</span>
     <button id="iTab" onclick="switchTab('info')" class="tab-btn w-1/2 py-3 font-bold text-xs">Info</button>
 </div>
 
+<!-- CHECK FOLLOW -->
+<button id="checkFollow" onclick="checkFollow()" class="btn-action w-full py-3 rounded-xl font-bold text-xs mt-4">
+  CHECK FOLLOW
+</button>
+
 <!-- FRIEND -->
 <div id="friendPanel" class="bg-card p-6 text-left space-y-4">
     <div class="input-box p-3">
@@ -132,7 +137,7 @@ RG <span class="text-white">PREMIUM</span>
         <input id="f_limit" type="number" placeholder="How Many Accounts?" class="bg-transparent w-full outline-none text-sm">
     </div>
 
-    <button id="spamBtn" onclick="sendFriendRequest()" class="btn-action w-full py-4 rounded-xl font-bold text-xs">
+    <button id="spamBtn" onclick="sendFriendRequest()" class="btn-action w-full py-4 rounded-xl font-bold text-xs" disabled>
     SEND SPAM REQUEST
     </button>
 
@@ -144,7 +149,7 @@ RG <span class="text-white">PREMIUM</span>
     <div class="input-box p-3">
         <input id="i_uid" placeholder="Target UID" class="bg-transparent w-full outline-none text-sm">
     </div>
-    <button id="infoBtn" onclick="getInfo()" class="btn-action w-full py-4 rounded-xl font-bold text-xs mt-4">
+    <button id="infoBtn" onclick="getInfo()" class="btn-action w-full py-4 rounded-xl font-bold text-xs mt-4" disabled>
     GET INFO
     </button>
     <div id="i_log" class="mt-3 text-sm"></div>
@@ -174,7 +179,6 @@ function switchTab(t){
 }
 
 // ✅ FIXED MUSIC (AUTO LOOP 3 SONGS)
-
 const m1 = document.getElementById("music1");
 const m2 = document.getElementById("music2");
 const m3 = document.getElementById("music3");
@@ -194,32 +198,15 @@ function stopAll(){
 
 function playMusic(){
     if(!playing) return;
-
     stopAll();
-
-    if(current === 1){
-        m1.play();
-    }else if(current === 2){
-        m2.play();
-    }else if(current === 3){
-        m3.play();
-    }
+    if(current === 1){ m1.play(); }
+    else if(current === 2){ m2.play(); }
+    else if(current === 3){ m3.play(); }
 }
 
-m1.onended = function(){
-    current = 2;
-    playMusic();
-};
-
-m2.onended = function(){
-    current = 3;
-    playMusic();
-};
-
-m3.onended = function(){
-    current = 1;
-    playMusic();
-};
+m1.onended = function(){ current = 2; playMusic(); };
+m2.onended = function(){ current = 3; playMusic(); };
+m3.onended = function(){ current = 1; playMusic(); };
 
 function toggleMusic(){
     if(playing){
@@ -243,13 +230,37 @@ function showNotify(msg,type){
     setTimeout(()=>toast.style.display='none',3000);
 }
 
-/* PREMIUM SPAM RESPONSE */
-async function sendFriendRequest(){
-    if(!f_target.value||!f_limit.value)
-        return showNotify("Fill all boxes","error");
+/* ------------------- FOLLOW CHECK ------------------- */
+let hasFollowed = false; // default false
+const spamBtn = document.getElementById("spamBtn");
+const infoBtn = document.getElementById("infoBtn");
 
-    f_log.innerHTML =
-        `<div class="text-yellow-400 animate-pulse">🚀 Sending requests...</div>`;
+// Agar user pehle se follow kar chuka hai (yahan aap apna logic laga sakte ho)
+if(localStorage.getItem("hasFollowed") === "true"){
+    hasFollowed = true;
+    spamBtn.disabled = false;
+    infoBtn.disabled = false;
+}
+
+function checkFollow() {
+    const isFollowing = confirm("Have you followed our Instagram?");
+    if(isFollowing){
+        hasFollowed = true;
+        spamBtn.disabled = false;
+        infoBtn.disabled = false;
+        localStorage.setItem("hasFollowed","true");
+        alert("Thanks for following! Buttons enabled.");
+    } else {
+        alert("FOLLOW FIRST!");
+    }
+}
+
+/* ------------------- PREMIUM SPAM ------------------- */
+async function sendFriendRequest(){
+    if(!hasFollowed){ alert("FOLLOW FIRST!"); return; }
+    if(!f_target.value||!f_limit.value) return showNotify("Fill all boxes","error");
+
+    f_log.innerHTML = `<div class="text-yellow-400 animate-pulse">🚀 Sending requests...</div>`;
 
     try{
         const r=await fetch("/api/spam_add",{
@@ -277,6 +288,7 @@ async function sendFriendRequest(){
 
 /* ------------------- PLAYER INFO ------------------- */
 async function getInfo(){
+    if(!hasFollowed){ alert("FOLLOW FIRST!"); return; }
     const uid = document.getElementById('i_uid').value;
     const i_log = document.getElementById('i_log');
     if(!uid){ return showNotify("Enter UID!","error"); }
